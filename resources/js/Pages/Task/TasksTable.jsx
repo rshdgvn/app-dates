@@ -20,17 +20,18 @@ export default function TasksTable({
     };
 
     return (
-        <>  
+        <>
             {success && (
                 <div className="bg-emerald-500 py-2 px-4 text-white rounded mb-4">
                     {success}
                 </div>
             )}
-            
+
             <div className="overflow-auto">
                 <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
                     <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400 border-b-2 border-gray-500">
                         <tr className="text-nowrap">
+                            {!hideProjectColumn && <th className="px-3 py-3">Project</th>}
                             <th className="px-3 py-3">Name</th>
                             <th className="px-3 py-3">
                                 <SelectInput
@@ -56,6 +57,9 @@ export default function TasksTable({
                                 className="bg-white border-b dark:bg-gray-800 dark:border-gray-700"
                                 key={task.id}
                             >
+                                {!hideProjectColumn && (
+                                    <td className="px-3 py-2">{task.project.name}</td>
+                                )}
                                 <th className="px-3 py-2 text-gray-100 hover:underline">
                                     <Link href={route("task.show", task.id)}>{task.name}</Link>
                                 </th>
