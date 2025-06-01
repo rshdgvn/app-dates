@@ -27,15 +27,15 @@ export default function Index({ auth, projects, queryParams = null, success }) {
     searchFieldChanged(name, e.target.value);
   };
 
-  const sortChanged = (name) => {
-    if (name === queryParams.sort_field) {
+  const sortChanged = (e) => {
+    if (e === queryParams.sort_field) {
       if (queryParams.sort_direction === "asc") {
         queryParams.sort_direction = "desc";
       } else {
         queryParams.sort_direction = "asc";
       }
     } else {
-      queryParams.sort_field = name;
+      queryParams.sort_field = e;
       queryParams.sort_direction = "asc";
     }
     router.get(route("project.index"), queryParams);
@@ -62,9 +62,24 @@ export default function Index({ auth, projects, queryParams = null, success }) {
               {success}
             </div>
           )}
-          <div className="flex justify-between items-center gap-5 mx-5">
+          <div className="flex justify-between items-center gap-5 mx-5 mb-7">
+            <SelectInput
+              value = {queryParams.sort_field}
+              onChange={(e) =>
+                sortChanged(e.target.value)
+              }
+              className="bg-blue-500 py-1 px-3 text-white rounded-xl shadow transition-all w-32"
+            >
+              <option value="">Sort by</option>
+              <option value="name">Name</option>
+              <option value="status">Status</option>
+              <option value="created_at">Created At</option>
+              <option value="due_date">Due Date</option>
+              <option value="created_by">Created By</option>
+            </SelectInput>
+
             <TextInput
-              className="w-[80%] rounded-3xl"
+              className="w-[70%] rounded-3xl"
               defaultValue={queryParams.name}
               placeholder="Project Name"
               onBlur={(e) => searchFieldChanged("name", e.target.value)}
@@ -111,9 +126,6 @@ export default function Index({ auth, projects, queryParams = null, success }) {
                         className="bg-white border-b dark:bg-gray-800 dark:border-gray-700"
                         key={project.id}
                       >
-                        <td className="px-3 py-2">
-                          <img src={project.image_path} style={{ width: 60 }} />
-                        </td>
                         <th className="px-3 py-2 text-gray-100 text-nowrap hover:underline">
                           <Link href={route("project.show", project.id)}>
                             {project.name}
@@ -136,6 +148,20 @@ export default function Index({ auth, projects, queryParams = null, success }) {
                           {project.due_date}
                         </td>
                         <td className="px-3 py-2">{project.createdBy.name}</td>
+                        <td className="px-3 py-2 text-nowrap">
+                          <Link
+                            href={route("project.edit", project.id)}
+                            className="font-medium text-blue-600 dark:text-blue-500 hover:underline mx-1"
+                          >
+                            Edit
+                          </Link>
+                          <button
+                            onClick={(e) => deleteProject(project)}
+                            className="font-medium text-red-600 dark:text-red-500 hover:underline mx-1"
+                          >
+                            Delete
+                          </button>
+                        </td>
                       </tr>
                     ))}
                   </tbody>
