@@ -7,7 +7,6 @@ import {
   PROJECT_STATUS_TEXT_MAP,
 } from "@/constants.jsx";
 import { Head, Link, router } from "@inertiajs/react";
-import TableHeading from "@/Components/TableHeading";
 
 export default function Index({ auth, projects, queryParams = null, success }) {
   queryParams = queryParams || {};
