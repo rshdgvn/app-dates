@@ -12,6 +12,9 @@ class DashboardController extends Controller
     public function index()
     {
         $user = Auth::user();
+
+        $totalAllTasks = Task::count();
+
         $totalPendingTasks = Task::query()
             ->where('status', 'pending')
             ->count();
@@ -47,6 +50,7 @@ class DashboardController extends Controller
         return inertia(
             'Dashboard',
             compact(
+                'totalAllTasks',
                 'totalPendingTasks',
                 'myPendingTasks',
                 'totalProgressTasks',

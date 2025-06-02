@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\TaskCreated;
 use App\Http\Resources\ProjectResource;
 use App\Http\Resources\TaskResource;
 use App\Http\Resources\UserResource;
@@ -66,13 +67,16 @@ class TaskController extends Controller
         $data = $request->validated();
         /** @var \Illuminate\Http\UploadedFile|null $image */
         $image = $data['image'] ?? null;
-        
+
         $data['created_by'] = Auth::id();
         $data['updated_by'] = Auth::id();
         if ($image) {
             $data['image_path'] = $image->store('task/' . Str::random(), 'public');
         }
-        Task::create($data);
+
+        $task = Task::create($data);
+
+        event(new TaskCreated($task));
 
         return to_route('task.index')
             ->with('success', 'Task was created');
