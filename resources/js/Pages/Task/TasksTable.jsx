@@ -11,12 +11,21 @@ export default function TasksTable({
     queryParams = null,
     hideProjectColumn = false,
 }) {
-
     const deleteTask = (task) => {
         if (!window.confirm("Are you sure you want to delete the task?")) {
             return;
         }
         router.delete(route("task.destroy", task.id));
+    };
+
+    const searchFieldChanged = (name, value) => {
+        if (value) {
+            queryParams[name] = value;
+        } else {
+            delete queryParams[name];
+        }
+
+        router.get(route("task.index"), queryParams);
     };
 
     return (
@@ -36,8 +45,10 @@ export default function TasksTable({
                             <th className="px-3 py-3">
                                 <SelectInput
                                     className="w-full"
-                                    defaultValue={queryParams.status}
-                                    onChange={(e) => searchFieldChanged("status", e.target.value)}
+                                    defaultValue={queryParams?.status}
+                                    onChange={(e) =>
+                                        searchFieldChanged("status", e.target.value)
+                                    }
                                 >
                                     <option value="">Select Status</option>
                                     <option value="pending">Pending</option>
@@ -47,36 +58,48 @@ export default function TasksTable({
                             </th>
                             <th className="px-3 py-3">Created Date</th>
                             <th className="px-3 py-3">Due Date</th>
-                            <th className="px-3 py-3">Name</th>
+                            <th className="px-3 py-3">Created By</th>
                             <th className="px-3 py-3"></th>
                         </tr>
                     </thead>
                     <tbody>
-                        {tasks.data.map((task) => (
+                        {tasks?.data?.map((task) => (
                             <tr
                                 className="bg-white border-b dark:bg-gray-800 dark:border-gray-700"
                                 key={task.id}
                             >
                                 {!hideProjectColumn && (
-                                    <td className="px-3 py-2">{task.project.name}</td>
+                                    <td className="px-3 py-2">
+                                        {task.project?.name || (
+                                            <span className="italic text-gray-400">N/A</span>
+                                        )}
+                                    </td>
                                 )}
                                 <th className="px-3 py-2 text-gray-100 hover:underline">
-                                    <Link href={route("task.show", task.id)}>{task.name}</Link>
+                                    <Link href={route("task.show", task.id)}>
+                                        {task.name || <span className="italic text-gray-400">N/A</span>}
+                                    </Link>
                                 </th>
                                 <td className="px-3 py-2">
                                     <span
                                         className={
                                             "px-2 py-1 rounded text-nowrap text-white " +
-                                            TASK_STATUS_CLASS_MAP[task.status]
+                                            (TASK_STATUS_CLASS_MAP[task.status] || "bg-gray-400")
                                         }
                                     >
-                                        {TASK_STATUS_TEXT_MAP[task.status]}
+                                        {TASK_STATUS_TEXT_MAP[task.status] || "Unknown"}
                                     </span>
                                 </td>
-                                <td className="px-3 py-2 text-nowrap">{task.created_at}</td>
-                                <td className="px-3 py-2 text-nowrap">{task.due_date}</td>
+                                <td className="px-3 py-2 text-nowrap">
+                                    {task.created_at || <span className="italic text-gray-400">N/A</span>}
+                                </td>
+                                <td className="px-3 py-2 text-nowrap">
+                                    {task.due_date || <span className="italic text-gray-400">N/A</span>}
+                                </td>
                                 <td className="px-3 py-2">
-                                    {task.createdBy?.name || <span className="italic text-gray-400">N/A</span>}
+                                    {task.createdBy?.name || (
+                                        <span className="italic text-gray-400">N/A</span>
+                                    )}
                                 </td>
                                 <td className="px-3 py-2 text-nowrap">
                                     <Link
@@ -95,7 +118,6 @@ export default function TasksTable({
                             </tr>
                         ))}
                     </tbody>
-
                 </table>
             </div>
             <Pagination links={tasks.meta.links} />
