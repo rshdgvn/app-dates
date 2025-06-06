@@ -2,107 +2,62 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\StoreProjectRequest;
-use App\Http\Requests\UpdateProjectRequest;
-use App\Http\Resources\ProjectResource;
-use App\Http\Resources\TaskResource;
-use App\Models\Project;
-use App\Services\ProjectService;
-use Illuminate\Support\Facades\Request;
+use App\Http\Requests\ProfileUpdateRequest;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Redirect;
+use Inertia\Inertia;
+use Inertia\Response;
 
-class ProjectController extends Controller
+class ProfileController extends Controller
 {
-    protected $projectService;
-
-    public function __construct(ProjectService $projectService)
+    /**
+     * Display the user's profile form.
+     */
+    public function edit(Request $request): Response
     {
-        $this->projectService = $projectService;
-    }
-
-    public function index()
-    {
-        $query = Project::query();
-
-        $sortField = request("sort_field", 'created_at');
-        $sortDirection = request("sort_direction", "desc");
-
-        if (request("name")) {
-            $query->where("name", "like", "%" . request("name") . "%");
-        }
-        if (request("status")) {
-            $query->where("status", request("status"));
-        }
-
-        $projects = $query->orderBy($sortField, $sortDirection)
-            ->paginate(10)
-            ->onEachSide(1);
-
-        return inertia("Project/Index", [
-            "projects" => ProjectResource::collection($projects),
-            'queryParams' => request()->query() ?: null,
-            'success' => session('success'),
+        return Inertia::render('Profile/Edit', [
+            'mustVerifyEmail' => $request->user() instanceof MustVerifyEmail,
+            'status' => session('status'),
         ]);
     }
 
-    public function create()
+    /**
+     * Update the user's profile information.
+     */
+    public function update(ProfileUpdateRequest $request): RedirectResponse
     {
-        return inertia("Project/Create");
-    }
+        $request->user()->fill($request->validated());
 
-    public function store(StoreProjectRequest $request)
-    {
-        $data = $request->validated();
-        $this->projectService->createProject($data);
-
-        return to_route('project.index')->with('success', 'Project was created');
-    }
-
-    public function show(Project $project)
-    {
-        $query = $project->tasks();
-
-        $sortField = request("sort_field", 'created_at');
-        $sortDirection = request("sort_direction", "desc");
-
-        if (request("name")) {
-            $query->where("name", "like", "%" . request("name") . "%");
-        }
-        if (request("status")) {
-            $query->where("status", request("status"));
+        if ($request->user()->isDirty('email')) {
+            $request->user()->email_verified_at = null;
         }
 
-        $tasks = $query->orderBy($sortField, $sortDirection)
-            ->paginate(10)
-            ->onEachSide(1);
+        $request->user()->save();
 
-        return inertia('Project/Show', [
-            'project' => new ProjectResource($project),
-            'tasks' => TaskResource::collection($tasks),
-            'queryParams' => request()->query() ?: null,
-            'success' => session('success'),
+        return Redirect::route('profile.edit');
+    }
+
+    /**
+     * Delete the user's account.
+     */
+    public function destroy(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'password' => ['required', 'current_password'],
         ]);
-    }
 
-    public function edit(Project $project)
-    {
-        return inertia('Project/Edit', [
-            'project' => new ProjectResource($project),
-        ]);
-    }
+        $user = $request->user();
 
-    public function update(UpdateProjectRequest $request, Project $project)
-    {
-        $data = $request->validated();
-        $this->projectService->updateProject($project, $data);
+        Auth::logout();
 
-        return to_route('project.index')->with('success', "Project \"$project->name\" was updated");
-    }
+        $user->delete();
 
-    public function destroy(Project $project)
-    {
-        $name = $project->name;
-        $this->projectService->deleteProject($project);
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
 
-        return to_route('project.index')->with('success', "Project \"$name\" was deleted");
+        return Redirect::to('/');
     }
 }
