@@ -9,7 +9,7 @@ export default function AuthenticatedLayout({ header, children }) {
     const user = usePage().props.auth.user;
 
     return (
-        <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
+        <>
             <nav className="border-b border-gray-100 bg-white dark:border-gray-700 dark:bg-gray-800">
                 <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                     <div className="flex h-16 justify-between">
@@ -28,29 +28,39 @@ export default function AuthenticatedLayout({ header, children }) {
                 </div>
             </nav>
 
-            {user ? (
-                <Link
-                    href={route('dashboard')}
-                    className="rounded-md px-3 py-2 text-black ring-1 ring-transparent transition hover:text-black/70 focus:outline-none focus-visible:ring-[#FF2D20] dark:text-white dark:hover:text-white/80 dark:focus-visible:ring-white"
-                >
-                    Dashboard
-                </Link>
-            ) : (
-                <>
-                    <Link
-                        href={route('login')}
-                        className="rounded-md px-3 py-2 text-black ring-1 ring-transparent transition hover:text-black/70 focus:outline-none focus-visible:ring-[#FF2D20] dark:text-white dark:hover:text-white/80 dark:focus-visible:ring-white"
-                    >
-                        Log in
-                    </Link>
-                    <Link
-                        href={route('register')}
-                        className="rounded-md px-3 py-2 text-black ring-1 ring-transparent transition hover:text-black/70 focus:outline-none focus-visible:ring-[#FF2D20] dark:text-white dark:hover:text-white/80 dark:focus-visible:ring-white"
-                    >
-                        Register
-                    </Link>
-                </>
-            )}
-        </div>
+            <div className="flex items-center justify-center min-h-screen bg-gray-100 dark:bg-gray-900">
+                <div className='flex-col justify-start gap-5'>
+                    <h1 className='text-3xl font-bold text-gray-900 dark:text-white'>App Dates</h1>
+                    <p className='my-7 text-gray-900 dark:text-white'>
+                        Streamline your workflow with a visual and efficient <br />
+                        Kanban system—boost productivity, track progress, and <br />
+                        stay organized effortlessly!
+                    </p>
+                    {user ? (
+                        <Link
+                            href={route('dashboard')}
+                            className="rounded-md px-3 py-2 bg-blue-500 text-white"
+                        >
+                            Dashboard
+                        </Link>
+                    ) : (
+                        <>
+                            <Link
+                                href={route('login')}
+                                className="rounded-md px-3 py-2 bg-blue-500 text-white mr-5"
+                            >
+                                Log in
+                            </Link>
+                            <Link
+                                href={route('register')}
+                               className="rounded-md px-3 py-2 bg-blue-800 text-white"
+                            >
+                                Register
+                            </Link>
+                        </>
+                    )}
+                </div>
+            </div>
+        </>
     );
 }
